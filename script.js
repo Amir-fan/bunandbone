@@ -6,6 +6,8 @@ const navLinks = document.querySelectorAll('.nav-link');
 const menuItems = document.querySelectorAll('.menu-item');
 const contactForm = document.querySelector('.contact-form');
 const floatingItems = document.querySelectorAll('.floating-item');
+const categoryBtns = document.querySelectorAll('.category-btn');
+const menuCategories = document.querySelectorAll('.menu-category');
 
 // Mobile Menu Toggle
 hamburger.addEventListener('click', () => {
@@ -332,4 +334,171 @@ function throttle(func, limit) {
 // Apply throttling to scroll events
 window.addEventListener('scroll', throttle(() => {
     // Scroll-based animations and effects
-}, 16)); // ~60fps 
+}, 16)); // ~60fps
+
+// Menu Category Filtering
+categoryBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const category = btn.getAttribute('data-category');
+        
+        // Update active button
+        categoryBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Filter menu items
+        menuCategories.forEach(categoryEl => {
+            const categoryType = categoryEl.getAttribute('data-category');
+            
+            if (category === 'all' || category === categoryType) {
+                categoryEl.style.display = 'block';
+                categoryEl.style.opacity = '0';
+                categoryEl.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    categoryEl.style.opacity = '1';
+                    categoryEl.style.transform = 'translateY(0)';
+                    categoryEl.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                }, 100);
+            } else {
+                categoryEl.style.opacity = '0';
+                categoryEl.style.transform = 'translateY(20px)';
+                categoryEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                
+                setTimeout(() => {
+                    categoryEl.style.display = 'none';
+                }, 300);
+            }
+        });
+    });
+});
+
+// Smooth scroll function for buttons
+function scrollToSection(sectionId) {
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        const offsetTop = targetSection.offsetTop - 80;
+        window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+        });
+    }
+}
+
+// Enhanced menu item interactions
+menuItems.forEach(item => {
+    item.addEventListener('mouseenter', () => {
+        item.style.transform = 'translateY(-15px) scale(1.02)';
+        
+        // Add sparkle effect
+        const sparkle = document.createElement('div');
+        sparkle.className = 'sparkle';
+        sparkle.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: sparkle 1s ease-out forwards;
+        `;
+        item.appendChild(sparkle);
+        
+        setTimeout(() => sparkle.remove(), 1000);
+    });
+    
+    item.addEventListener('mouseleave', () => {
+        item.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Add sparkle animation to CSS
+const sparkleStyle = document.createElement('style');
+sparkleStyle.textContent = `
+    @keyframes sparkle {
+        0% {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 1;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(sparkleStyle);
+
+// Enhanced floating elements animation
+floatingItems.forEach((item, index) => {
+    item.style.animationDelay = `${index * 0.5}s`;
+    item.style.animationDuration = `${6 + index}s`;
+});
+
+// Add parallax effect to floating elements
+window.addEventListener('scroll', throttle(() => {
+    const scrolled = window.pageYOffset;
+    floatingItems.forEach((item, index) => {
+        const speed = 0.5 + (index * 0.1);
+        const yPos = -(scrolled * speed);
+        item.style.transform = `translateY(${yPos}px) rotate(${scrolled * 0.1}deg)`;
+    });
+}, 16));
+
+// Add loading animation for menu items
+const menuObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const items = entry.target.querySelectorAll('.menu-item');
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            menuObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+menuCategories.forEach(category => {
+    const items = category.querySelectorAll('.menu-item');
+    items.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    });
+    menuObserver.observe(category);
+});
+
+// Developer Popup Functions
+function showDevPopup() {
+    const popup = document.getElementById('devPopup');
+    popup.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function hideDevPopup() {
+    const popup = document.getElementById('devPopup');
+    popup.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', (e) => {
+    const popup = document.getElementById('devPopup');
+    if (e.target === popup) {
+        hideDevPopup();
+    }
+});
+
+// Close popup with Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        hideDevPopup();
+    }
+}); 
